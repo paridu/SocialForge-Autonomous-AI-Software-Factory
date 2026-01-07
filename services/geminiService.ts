@@ -1,20 +1,24 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+// Initialize the GoogleGenAI client with the API key from environment variables.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
+/**
+ * 1. วิจัยตลาดและค้นหา Pain Points / Solutions (ภาษาไทย)
+ */
 export const performResearch = async (market: string) => {
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
     contents: `รับบทเป็น Viral Niche Algorithmic Scout. วิเคราะห์ตลาด ${market} ในปี 2025.
     ระบุโอกาสที่ยังไม่มีใครทำ (White Space).
-    ตอบกลับในรูปแบบ JSON ภาษาไทย:
-    - name: ชื่อโครงการ
-    - concept: แนวคิดหลัก
-    - painPoints: รายการปัญหาหลัก 3 ข้อ (Array ของ String)
-    - solutions: วิธีการแก้ปัญหา 3 ข้อ (Array ของ String)
-    - presentation: สรุปสั้นๆ สำหรับนำเสนอ (String)
-    - features: รายการฟีเจอร์หลัก (Array ของ String)`,
+    ตอบกลับในรูปแบบ JSON ภาษาไทยเท่านั้น:
+    - name: ชื่อโครงการสุดล้ำ
+    - concept: แนวคิดหลักที่ทำให้เป็นไวรัล
+    - painPoints: รายการปัญหาหลักของผู้ใช้ 3-5 ข้อ (Array)
+    - solutions: วิธีแก้ปัญหาด้วยเทคโนโลยี AI/Social 3-5 ข้อ (Array)
+    - presentation: สรุปใจความสำคัญสำหรับการนำเสนอใน 2 ประโยค
+    - features: รายการฟีเจอร์หลักที่ต้องมีใน MVP (Array)`,
     config: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -34,17 +38,22 @@ export const performResearch = async (market: string) => {
   return JSON.parse(response.text);
 };
 
+/**
+ * 2. วางแผนเชิงเทคนิค (PRD, Context, Sitemap, DB) (ภาษาไทย)
+ */
 export const generateTechnicalPlan = async (projectData: any) => {
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `รับบทเป็น Senior Solution Architect & Context Engineer. ออกแบบโครงสร้างทางเทคนิคสำหรับโครงการ "${projectData.name}".
-    ข้อมูลโครงการ: ${JSON.stringify(projectData)}
-    กรุณาสร้าง:
-    1. PRD (Product Requirements Document) อย่างละเอียด
-    2. Context Analysis (สภาพแวดล้อมทางเทคนิคและข้อจำกัด)
-    3. Sitemap (โครงสร้างหน้าเว็บและการไหลเวียนของผู้ใช้)
-    4. Database Schema (โครงสร้างฐานข้อมูล ER Diagram เชิงข้อความ)
-    ตอบกลับเป็นภาษาไทยในรูปแบบ JSON`,
+    contents: `รับบทเป็น Solution Architect & Context Engineer. ออกแบบโครงสร้างซอฟต์แวร์สำหรับ "${projectData.name}".
+    ข้อมูลเบื้องต้น: ${JSON.stringify(projectData)}
+    
+    สร้างรายละเอียดดังนี้ (เป็นภาษาไทย):
+    1. PRD: รายละเอียดความต้องการทางเทคนิคและธุรกิจ
+    2. Context: การวิเคราะห์บริบทเทคนิค ข้อจำกัด และ Dependencies
+    3. Sitemap: โครงสร้างหน้าเว็บ และ User Journey
+    4. Database Schema: รายละเอียดตารางและความสัมพันธ์ (Text-based ERD)
+    
+    ตอบกลับในรูปแบบ JSON`,
     config: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -62,26 +71,29 @@ export const generateTechnicalPlan = async (projectData: any) => {
   return JSON.parse(response.text);
 };
 
+/**
+ * 3. ผลิตซอร์สโค้ดและเอกสารทั้งหมด (9 ไฟล์มาตรฐาน)
+ */
 export const generateCode = async (projectData: any, technicalPlan: any) => {
   const response = await ai.models.generateContent({
     model: "gemini-3-pro-preview",
-    contents: `รับบทเป็นกองทัพ AI Software Factory (Lead Engineer & Scribe). ผลิตซอฟต์แวร์มาตรฐานสูงสำหรับ "${projectData.name}".
+    contents: `รับบทเป็นกองทัพ AI Software Factory. ผลิตชุดไฟล์ซอฟต์แวร์มาตรฐานสากลสำหรับ "${projectData.name}".
     
     รายละเอียดโปรเจกต์: ${JSON.stringify(projectData)}
     แผนงานเทคนิค: ${JSON.stringify(technicalPlan)}
     
-    คุณต้องสร้างไฟล์ต่อไปนี้ให้ครบถ้วน (ภาษาไทยในส่วนเอกสาร):
-    1. App.tsx: โค้ด React + Tailwind CSS สำหรับ MVP ที่ใช้งานได้จริง
-    2. prd.md: เอกสาร Product Requirements
-    3. context.md: เอกสารวิเคราะห์บริบททางเทคนิค (Context Engineering)
-    4. sitemap.md: แผนผังโครงสร้างหน้าเว็บ (Sitemap)
-    5. database.md: รายละเอียดการออกแบบฐานข้อมูล (Database Design)
-    6. agent.md: บันทึกการทำงานและตรรกะของ AI Agents แต่ละตัวที่ใช้ผลิตโครงการนี้
-    7. README.md: คู่มือรวม Pain Points, Solutions และวิธีใช้งาน
-    8. presentation.md: เนื้อหาสำหรับนำเสนอ (Pitch Deck)
-    9. index.tsx: จุดเริ่มต้นของแอปพลิเคชัน
+    คุณต้องส่งไฟล์กลับมาให้ครบถ้วน 9 ไฟล์ ดังนี้ (เอกสาร .md ต้องเป็นภาษาไทย):
+    1. App.tsx: โค้ด React + Tailwind ที่ทำงานได้จริงและสวยงาม
+    2. index.tsx: Entry point
+    3. README.md: คู่มือการใช้งาน รวม Pain Points และ Solutions อย่างละเอียด
+    4. prd.md: เอกสาร Product Requirements จาก Agent PRD
+    5. context.md: เอกสาร Context Engineering จาก Agent Context
+    6. sitemap.md: รายละเอียด Sitemap และ Flow จาก Agent Sitemap
+    7. database.md: รายละเอียด Database Schema จาก Agent Database
+    8. agent.md: บันทึกประวัติการตัดสินใจและตรรกะของกองทัพ Agent ในการผลิตครั้งนี้
+    9. presentation.md: เนื้อหา Pitch Deck สำหรับผู้นำเสนอ
     
-    เน้นความเป็นมืออาชีพและโครงสร้างไฟล์ที่ถูกต้องตามมาตรฐาน Software Engineering`,
+    โครงสร้างไฟล์ต้องเป็นมืออาชีพ โค้ดต้องสะอาดและเป็นไปตามหลัก Software Architecture`,
     config: {
       responseMimeType: "application/json",
       thinkingConfig: { thinkingBudget: 4000 },
@@ -107,17 +119,22 @@ export const generateCode = async (projectData: any, technicalPlan: any) => {
   return JSON.parse(response.text).files;
 };
 
+/**
+ * 4. ตรวจสอบความถูกต้องของโครงสร้าง (Structural Audit)
+ */
 export const auditCode = async (files: any[]) => {
+  const filePaths = files.map(f => f.path);
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `รับบทเป็น Structural Auditor & Inspector. ตรวจสอบชุดไฟล์ซอฟต์แวร์นี้: ${JSON.stringify(files.map(f => f.path))}.
+    contents: `รับบทเป็น Inspector Agent (Auditor). ตรวจสอบชุดไฟล์งานนี้: ${JSON.stringify(filePaths)}.
     
-    กฎการตรวจสอบ:
-    - ต้องมีไฟล์ prd.md, context.md, sitemap.md, database.md, agent.md ครบถ้วน
-    - README.md ต้องมีหัวข้อ Pain Points และ Solutions
-    - App.tsx ต้องไม่มี Error พื้นฐาน
+    เกณฑ์การตรวจสอบ:
+    - ต้องมี prd.md, context.md, sitemap.md, database.md, agent.md ครบ 5 ไฟล์หลักฝ่ายแผน
+    - ต้องมี App.tsx และ index.tsx สำหรับการรันระบบ
+    - README.md และ presentation.md ต้องครบถ้วน
+    - ตรวจสอบว่ามีเนื้อหา Pain Points และ Solutions อยู่ในเอกสารหรือไม่
     
-    ตอบกลับเป็น JSON ภาษาไทย (status: "Pass" หรือ "Fail", notes: รายละเอียดคำแนะนำ)`,
+    ตอบกลับเป็น JSON ภาษาไทย (status: "Pass" หรือ "Fail", notes: รายละเอียดสาเหตุ)`,
     config: {
       responseMimeType: "application/json",
       responseSchema: {
