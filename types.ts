@@ -9,6 +9,7 @@ export enum AgentStatus {
 
 export enum PipelineStage {
   RESEARCH = 'RESEARCH',
+  PLANNING = 'PLANNING',
   ARCHITECTURE = 'ARCHITECTURE',
   CODING = 'CODING',
   QA = 'QA',
@@ -24,6 +25,7 @@ export interface AIAgent {
   status: AgentStatus;
   lastMessage?: string;
   avatar: string;
+  targetId?: string; // สำหรับวาดเส้นเชื่อมโยงการคุยกัน
 }
 
 export interface ConnectionState {
@@ -37,6 +39,9 @@ export interface ProjectState {
   id: string;
   name: string;
   concept: string;
+  painPoints: string[];
+  solutions: string[];
+  presentation: string;
   features: string[];
   codeFiles: Array<{ path: string; content: string }>;
   githubUrl?: string;
