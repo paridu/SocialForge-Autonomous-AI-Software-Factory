@@ -1,17 +1,16 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { AgentStatus, PipelineStage, AIAgent, ProjectState, LogEntry, ConnectionState } from './types';
+import { AgentStatus, PipelineStage, AIAgent, ProjectState, LogEntry } from './types';
 import { performResearch, generateTechnicalPlan, generateCode, auditCode } from './services/geminiService';
 import { 
   Terminal, Code, Cpu, Rocket, ShieldCheck, Factory, Zap, 
   Globe, CheckCircle2, AlertTriangle, ExternalLink, X, 
   Download, FileJson, FileText, Presentation, BookOpen, 
   Users, Database, Map, ClipboardList, Info, MessageSquare, 
-  ArrowRight, RefreshCcw, Layers, Activity, Monitor, ChevronRight
+  ArrowRight, RefreshCcw, Layers, Activity, Monitor, Search
 } from 'lucide-react';
 import JSZip from 'jszip';
 
-// คำนิยามกองทัพ AI ตามโจทย์ที่ได้รับ
 const INITIAL_AGENTS: AIAgent[] = [
   { id: 'echo', name: 'Nexus Echo', role: 'Strategic Intelligence', description: 'วิเคราะห์เทรนด์และค้นหาโอกาสทางการตลาด', stage: PipelineStage.RESEARCH, status: AgentStatus.IDLE, avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=echo&backgroundColor=020617' },
   { id: 'prd', name: 'Agent PRD', role: 'Product Strategist', description: 'สร้าง PRD.md กำหนดขอบเขตสินค้าและเป้าหมาย', stage: PipelineStage.PLANNING, status: AgentStatus.IDLE, avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=prd&backgroundColor=020617' },
@@ -58,7 +57,7 @@ const App: React.FC = () => {
     setProject(prev => {
       const logs = prev ? [...prev.logs, newLog] : [newLog];
       return prev ? { ...prev, logs } : {
-        id: 'nexus-cmd', name: 'Standby Mode', concept: '', painPoints: [], solutions: [], presentation: '', features: [], codeFiles: [], logs, currentStage: PipelineStage.RESEARCH
+        id: 'nexus-cmd', name: 'Ready for Protocol', concept: '', painPoints: [], solutions: [], presentation: '', features: [], codeFiles: [], logs, currentStage: PipelineStage.RESEARCH
       };
     });
   }, []);
@@ -89,49 +88,51 @@ const App: React.FC = () => {
     
     try {
       // Step 1: Research
-      await triggerLink('echo', 'echo', 'กำลังสแกนหาช่องว่างในตลาด Social Tech 2025...');
-      const research = await performResearch('Future Social Interaction & Web3 Creators');
+      await triggerLink('echo', 'echo', 'Initializing deep-market intelligence scan for 2025 opportunities...');
+      const research = await performResearch('AI-First Decentralized Social Platforms');
       setProject(prev => ({ ...prev!, ...research, currentStage: PipelineStage.RESEARCH }));
       
-      // Step 2: Planning (Agent PRD & Agent Context)
-      await triggerLink('echo', 'prd', 'ส่งต่อข้อมูล Niche ตลาดให้ Agent PRD ร่าง PRD.md...');
-      await triggerLink('prd', 'context', 'PRD พร้อมแล้ว ส่งต่อให้ Agent Context วิเคราะห์บริบททางเทคนิค...');
+      // Step 2: Planning
+      await triggerLink('echo', 'prd', 'Market intelligence secured. Dispatching data to Product Strategist...');
+      await triggerLink('prd', 'context', 'PRD blueprint finalized. Context Engineer initiating system environment mapping...');
       
-      // Step 3: Architecture (Agent Sitemap & Agent Database)
-      await triggerLink('context', 'sitemap', 'โครงสร้างเทคนิคเรียบร้อย ส่งต่อให้ Agent Sitemap วาง User Flow...');
-      await triggerLink('sitemap', 'database', 'UX Flow พร้อมแล้ว Agent Database กำลังออกแบบ Schema ข้อมูล...');
+      // Step 3: Architecture
+      await triggerLink('context', 'sitemap', 'Technical constraints analyzed. UX Architect building interaction flows...');
+      await triggerLink('sitemap', 'database', 'User journey mapped. Data Engineer designing relational schema...');
       const plan = await generateTechnicalPlan(research);
       setProject(prev => ({ ...prev!, currentStage: PipelineStage.ARCHITECTURE }));
 
       // Step 4: Coding & Quality Loop
       let codeFiles: any[] = [];
       let loop = 0;
-      while (loop < 2) {
+      const maxLoops = 2;
+
+      while (loop < maxLoops) {
         loop++;
-        await triggerLink('database', 'forge', loop > 1 ? `รอบที่ ${loop}: กำลังแก้ไขโค้ดตามผลการตรวจสอบ...` : 'โครงสร้างฐานข้อมูลเสร็จสิ้น ส่งต่อให้ Agent Forge เริ่มการผลิตซอร์สโค้ด...');
-        await triggerLink('forge', 'scribe', 'โค้ดส่วนใหญ่เสร็จแล้ว ฝ่าย Scribe เริ่มจัดทำเอกสารคู่มือ...');
+        await triggerLink('database', 'forge', loop > 1 ? `Revision Cycle ${loop}: Rectifying structural inconsistencies...` : 'Schema confirmed. Lead Developer initiating core module fabrication...');
+        await triggerLink('forge', 'scribe', 'Modules reaching alpha status. Technical Writer documenting system architecture...');
         codeFiles = await generateCode(research, plan);
         setProject(prev => ({ ...prev!, codeFiles, currentStage: PipelineStage.CODING }));
 
-        await triggerLink('scribe', 'inspector', 'รวบรวมไฟล์ทั้งหมดส่งให้ฝ่าย Audit ตรวจสอบคุณภาพงาน...');
+        await triggerLink('scribe', 'inspector', 'Bundling code matrix for structural integrity audit...');
         const audit = await auditCode(codeFiles);
         if (audit.status === 'Pass') {
-          addLog('Nexus Audit', 'ตรวจสอบสำเร็จ งานผ่านมาตรฐาน 100%', 'success');
+          addLog('Nexus Audit', 'Integrity check successful. Software meets all enterprise standards.', 'success');
           break;
         } else {
-          addLog('Nexus Audit', `พบจุดบกพร่อง: ${audit.notes}. กำลังส่งกลับไปแก้ไข...`, 'warning');
-          await triggerLink('inspector', 'forge', 'ส่ง Feedback ข้อผิดพลาดกลับไปยังฝ่าย Developer...');
+          addLog('Nexus Audit', `Inconsistency detected: ${audit.notes}. Re-routing for correction...`, 'warning');
+          await triggerLink('inspector', 'forge', 'Dispatching feedback loop to development core...');
         }
       }
 
       // Step 5: Deployment
-      await triggerLink('inspector', 'orbit', 'งานทุกอย่างพร้อมแล้ว Nexus Orbit กำลังทำ Automated Deployment...');
+      await triggerLink('inspector', 'orbit', 'Quality protocol complete. Nexus Orbit initializing automated deployment...');
       const finalUrl = `https://${research.name.toLowerCase().replace(/\s+/g, '-')}.nexus-forge.ai`;
       setProject(prev => ({ ...prev!, vercelUrl: finalUrl, currentStage: PipelineStage.DEPLOYMENT }));
-      addLog('Nexus Orbit', `ปฏิบัติการสำเร็จ! ออนไลน์แล้วที่: ${finalUrl}`, 'success');
+      addLog('Nexus Orbit', `Operational Success. Platform deployed to production grid at: ${finalUrl}`, 'success');
 
     } catch (e: any) {
-      addLog('Nexus Error', `ระบบขัดข้อง: ${e.message}`, 'error');
+      addLog('Nexus Critical', `Kernel Failure: ${e.message}`, 'error');
     } finally {
       setIsFactoryRunning(false);
     }
@@ -147,11 +148,11 @@ const App: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `nexus-project-${project.name.toLowerCase().replace(/\s+/g, '-')}.zip`;
+      a.download = `nexus-artifact-${project.name.toLowerCase().replace(/\s+/g, '-')}.zip`;
       a.click();
-      addLog('System', 'ดาวน์โหลดซอฟต์แวร์แพ็กเกจสำเร็จ', 'success');
+      addLog('System', 'Artifact package secured and exported.', 'success');
     } catch (e: any) {
-      addLog('System', 'การสร้างไฟล์ดาวน์โหลดล้มเหลว', 'error');
+      addLog('System', 'Export encryption failed.', 'error');
     } finally {
       setIsDownloading(false);
     }
@@ -160,7 +161,7 @@ const App: React.FC = () => {
   const agentNodes = useMemo(() => {
     return agents.map((agent, i) => {
       const angle = (i / agents.length) * 2 * Math.PI;
-      const radius = 180;
+      const radius = 190;
       return { ...agent, x: 250 + radius * Math.cos(angle), y: 250 + radius * Math.sin(angle) };
     });
   }, [agents]);
@@ -174,78 +175,87 @@ const App: React.FC = () => {
   }, [activeFlow, agentNodes]);
 
   return (
-    <div className="min-h-screen p-4 md:p-10 flex flex-col gap-8 max-w-[1600px] mx-auto relative z-10">
+    <div className="min-h-screen p-6 md:p-10 flex flex-col gap-10 max-w-[1700px] mx-auto relative z-10">
       
-      {/* Dynamic Header */}
-      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 glass-card p-10 rounded-[3rem] border-white/10 relative overflow-hidden">
-        <div className="flex items-center gap-8 relative z-10">
-          <div className="relative">
-            <div className="absolute inset-0 bg-cyan-500 blur-2xl opacity-20 animate-pulse"></div>
-            <div className="bg-slate-950 p-6 rounded-[2rem] border border-cyan-500/30 flex items-center justify-center relative">
-              <Cpu className="text-cyan-400" size={42} />
+      {/* Nexus Command Center Header */}
+      <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-10 glass-card p-10 md:p-14 rounded-[3.5rem] cyber-border overflow-hidden relative group">
+        <div className="flex items-center gap-10 relative z-10">
+          <div className="relative animate-float">
+            <div className="absolute inset-0 bg-cyan-400 blur-3xl opacity-25 animate-pulse"></div>
+            <div className="bg-slate-950 p-7 rounded-[2.5rem] border border-cyan-500/40 flex items-center justify-center relative shadow-2xl">
+              <Cpu className="text-cyan-400 group-hover:rotate-90 transition-transform duration-1000" size={52} />
             </div>
           </div>
           <div>
-            <div className="flex items-center gap-4">
-              <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase">NEXUS<span className="text-cyan-400">FORGE</span></h1>
-              <div className="h-2 w-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_15px_cyan]"></div>
+            <div className="flex items-center gap-5">
+              <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none">NEXUS<span className="text-cyan-400">FORGE</span></h1>
+              <div className="px-4 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded-full text-[10px] font-black text-cyan-400 tracking-[0.3em] uppercase">Enterprise v4.0</div>
             </div>
-            <p className="text-slate-400 font-mono text-xs mt-3 tracking-widest uppercase flex items-center gap-3">
-              <Activity size={14} className="text-cyan-400" /> System Engine: Gemini 3.0 Pro Enterprise
+            <p className="text-slate-400 font-mono text-xs mt-4 tracking-[0.2em] uppercase flex items-center gap-4">
+              <Activity size={16} className="text-cyan-500 animate-pulse" /> Autonomous Army Neural Grid Operational
             </p>
           </div>
         </div>
 
-        <button 
-          onClick={startFactory} 
-          disabled={isFactoryRunning} 
-          className="px-12 py-6 bg-cyan-600 hover:bg-cyan-500 text-white font-black rounded-3xl transition-all shadow-2xl shadow-cyan-500/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-4 text-lg group overflow-hidden relative"
-        >
-          {isFactoryRunning ? <RefreshCcw className="animate-spin" /> : <Rocket className="group-hover:-translate-y-1 transition-transform" />}
-          {isFactoryRunning ? 'OPERATING...' : 'INITIATE AUTO-FORGE'}
-          <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        </button>
+        <div className="flex items-center gap-6 relative z-10 w-full xl:w-auto">
+          <button 
+            onClick={startFactory} 
+            disabled={isFactoryRunning} 
+            className="w-full xl:w-auto px-16 py-7 bg-cyan-600 hover:bg-cyan-500 text-white font-black rounded-[2.2rem] transition-all shadow-[0_20px_60px_rgba(6,182,212,0.25)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-5 text-xl group overflow-hidden relative"
+          >
+            <div className="absolute inset-0 bg-white/10 -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
+            {isFactoryRunning ? <RefreshCcw className="animate-spin" size={24} /> : <Rocket size={24} className="group-hover:-translate-y-1 transition-transform" />}
+            {isFactoryRunning ? 'OPERATING GRID...' : 'INITIATE AUTO-FORGE'}
+          </button>
+        </div>
       </header>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+      <div className="grid grid-cols-1 2xl:grid-cols-12 gap-10 flex-1">
         
-        {/* Agent Visualization Center */}
-        <aside className="xl:col-span-5 flex flex-col gap-8">
-          <div className="glass-card p-8 rounded-[3.5rem] relative h-[700px] overflow-hidden flex flex-col">
-            <div className="flex items-center justify-between mb-8 relative z-10">
+        {/* Agent Visualization Hub */}
+        <aside className="2xl:col-span-5 flex flex-col gap-10">
+          <div className="glass-card p-10 rounded-[4rem] relative h-[750px] overflow-hidden flex flex-col shadow-inner group">
+            <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent pointer-events-none"></div>
+            
+            <div className="flex items-center justify-between mb-10 relative z-10">
               <div className="flex flex-col">
-                <h2 className="text-[11px] font-black text-cyan-400 uppercase tracking-[0.5em] flex items-center gap-3">
-                  <Monitor size={16} /> Neural Command Map
+                <h2 className="text-[12px] font-black text-cyan-400 uppercase tracking-[0.6em] flex items-center gap-4">
+                  <Monitor size={18} /> Neural Synapse Map
                 </h2>
-                <span className="text-slate-500 text-[10px] mt-1 font-mono uppercase">Live Agent Synapse Protocol</span>
+                <span className="text-slate-500 text-[10px] mt-2 font-mono uppercase tracking-widest">Real-time Agent Communication Matrix</span>
               </div>
-              <div className="flex gap-2">
-                <div className="h-2 w-2 rounded-full bg-cyan-500/50"></div>
-                <div className="h-2 w-2 rounded-full bg-emerald-500/50 animate-pulse"></div>
+              <div className="flex gap-3">
+                <div className="h-3 w-3 rounded-full bg-cyan-500/20 border border-cyan-500/40"></div>
+                <div className="h-3 w-3 rounded-full bg-emerald-500/40 animate-pulse border border-emerald-500/60"></div>
               </div>
             </div>
 
-            <svg viewBox="0 0 500 500" className="w-full h-full relative z-10 drop-shadow-[0_0_25px_rgba(6,182,212,0.1)]">
+            <svg viewBox="0 0 500 500" className="w-full h-full relative z-10 filter drop-shadow-[0_0_30px_rgba(6,182,212,0.1)]">
               <defs>
-                <linearGradient id="link-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#06b6d4" />
-                  <stop offset="100%" stopColor="#8b5cf6" />
+                <linearGradient id="synapse-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#06b6d4" stopOpacity="0" />
+                  <stop offset="50%" stopColor="#06b6d4" stopOpacity="1" />
+                  <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
                 </linearGradient>
+                <filter id="glow-synapse">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
               </defs>
 
-              <circle cx="250" cy="250" r="180" fill="none" stroke="rgba(255,255,255,0.03)" strokeWidth="1" strokeDasharray="10 5" />
+              <circle cx="250" cy="250" r="190" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" strokeDasharray="15 10" />
 
               {activeLink && (
-                <g>
+                <g filter="url(#glow-synapse)">
                   <path 
                     d={`M ${activeLink.x1} ${activeLink.y1} Q 250 250 ${activeLink.x2} ${activeLink.y2}`}
-                    fill="none" stroke="url(#link-grad)" strokeWidth="3" strokeDasharray="8 8" 
-                    className="animate-[dash_10s_linear_infinite]"
+                    fill="none" stroke="url(#synapse-grad)" strokeWidth="4" strokeDasharray="10 10" 
+                    className="animate-[dash_8s_linear_infinite]"
                   />
-                  <circle r="6" fill="#06b6d4" className="shadow-[0_0_15px_cyan]">
+                  <circle r="7" fill="#06b6d4">
                     <animateMotion 
                       path={`M ${activeLink.x1} ${activeLink.y1} Q 250 250 ${activeLink.x2} ${activeLink.y2}`} 
-                      dur="1s" 
+                      dur="0.8s" 
                       repeatCount="indefinite" 
                     />
                   </circle>
@@ -253,24 +263,24 @@ const App: React.FC = () => {
               )}
 
               {agentNodes.map(node => (
-                <g key={node.id} className="agent-node">
+                <g key={node.id} className="agent-node group/node">
                   <circle 
-                    cx={node.x} cy={node.y} r="38" 
-                    className={`transition-all duration-700 stroke-[1.5] ${
-                      node.status === AgentStatus.WORKING ? 'fill-cyan-500/10 stroke-cyan-400 animate-pulse scale-110' : 
+                    cx={node.x} cy={node.y} r="42" 
+                    className={`transition-all duration-700 stroke-[2] ${
+                      node.status === AgentStatus.WORKING ? 'fill-cyan-500/10 stroke-cyan-400 animate-pulse scale-110 shadow-[0_0_30px_rgba(6,182,212,0.3)]' : 
                       node.status === AgentStatus.COMPLETED ? 'fill-emerald-500/10 stroke-emerald-500' : 
-                      'fill-slate-950 stroke-white/10'
+                      'fill-slate-950 stroke-white/10 group-hover/node:stroke-white/30'
                     }`}
                   />
-                  <image href={node.avatar} x={node.x - 26} y={node.y - 26} width="52" height="52" className="rounded-full" />
+                  <image href={node.avatar} x={node.x - 28} y={node.y - 28} width="56" height="56" className="rounded-full" />
                   
                   <text 
-                    x={node.x} y={node.y + 55} 
+                    x={node.x} y={node.y + 65} 
                     textAnchor="middle" 
                     fill={node.status === AgentStatus.WORKING ? '#06b6d4' : '#64748b'} 
-                    fontSize="8" 
-                    fontWeight="800" 
-                    className="uppercase tracking-widest font-mono"
+                    fontSize="9" 
+                    fontWeight="900" 
+                    className="uppercase tracking-[0.2em] font-mono"
                   >
                     {node.role.split(' ')[0]}
                   </text>
@@ -278,37 +288,40 @@ const App: React.FC = () => {
               ))}
             </svg>
 
-            <div className="absolute bottom-10 left-10 right-10 p-8 glass-card bg-slate-950/40 rounded-[2.5rem] border-cyan-500/20 backdrop-blur-3xl shadow-2xl relative z-20">
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`h-3 w-3 rounded-full ${isFactoryRunning ? 'bg-cyan-400 animate-ping' : 'bg-slate-700'}`}></div>
-                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Neural Reasoning</h4>
+            <div className="absolute bottom-12 left-12 right-12 p-10 glass-card bg-slate-950/60 rounded-[3rem] border-cyan-500/20 backdrop-blur-3xl shadow-[0_30px_80px_rgba(0,0,0,0.6)] relative z-20">
+              <div className="flex items-center gap-5 mb-5">
+                <div className={`h-4 w-4 rounded-full ${isFactoryRunning ? 'bg-cyan-400 animate-ping' : 'bg-slate-700'}`}></div>
+                <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em]">Grid Processing Unit</h4>
               </div>
-              <p className="text-[13px] text-slate-200 font-bold leading-relaxed italic border-l-2 border-cyan-500 pl-4 py-1">
-                "{agents.find(a => a.status === AgentStatus.WORKING)?.lastMessage || "Nexus awaiting primary sequence..."}"
+              <p className="text-[15px] text-slate-100 font-bold leading-relaxed italic border-l-4 border-cyan-500 pl-6 py-2 bg-white/5 rounded-r-2xl">
+                {agents.find(a => a.status === AgentStatus.WORKING)?.lastMessage || "Nexus awaiting primary sequence initiation..."}
               </p>
             </div>
           </div>
         </aside>
 
-        {/* Console and Output Control */}
-        <section className="xl:col-span-7 flex flex-col gap-10">
+        {/* Console and Artifact Delivery Output */}
+        <section className="2xl:col-span-7 flex flex-col gap-10">
           
           {project && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in fade-in slide-in-from-right-8 duration-700">
-              <div className="glass-card p-10 rounded-[3rem] border-cyan-500/10 flex flex-col justify-between">
-                <div>
-                  <span className="text-[10px] text-cyan-400 font-black tracking-widest uppercase mb-2 block">Market Discovery</span>
-                  <h2 className="text-3xl font-black text-white tracking-tight leading-none mb-6">{project.name}</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 animate-in fade-in slide-in-from-bottom-12 duration-1000">
+              <div className="glass-card p-12 rounded-[4rem] border-cyan-500/10 flex flex-col justify-between group">
+                <div className="relative overflow-hidden">
+                  <div className="absolute -right-20 -top-20 opacity-[0.03] group-hover:rotate-12 transition-transform duration-700">
+                    <Rocket size={300} />
+                  </div>
+                  <span className="text-[11px] text-cyan-400 font-black tracking-[0.5em] uppercase mb-4 block">Market Insight Detected</span>
+                  <h2 className="text-4xl font-black text-white tracking-tighter leading-none mb-10">{project.name}</h2>
                   
-                  <div className="space-y-6">
+                  <div className="space-y-10">
                     <div>
-                      <h4 className="text-[10px] font-black text-rose-500/80 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <AlertTriangle size={14} /> Targeted Pain Points
+                      <h4 className="text-[11px] font-black text-rose-500/80 uppercase tracking-[0.5em] mb-6 flex items-center gap-3">
+                        <AlertTriangle size={18} /> Decrypted Pain Points
                       </h4>
-                      <div className="grid gap-2">
+                      <div className="grid gap-4">
                         {project.painPoints.map((p, i) => (
-                          <div key={i} className="text-xs text-slate-300 bg-slate-900/60 p-4 rounded-2xl border border-white/5 font-medium leading-relaxed">
-                            {p}
+                          <div key={i} className="text-sm text-slate-300 bg-slate-900/60 p-6 rounded-[2rem] border border-white/5 font-semibold leading-relaxed hover:border-rose-500/20 transition-all">
+                            <span className="text-rose-500 font-black mr-4 font-mono">0{i+1}</span> {p}
                           </div>
                         ))}
                       </div>
@@ -317,24 +330,26 @@ const App: React.FC = () => {
                 </div>
 
                 {project.vercelUrl && (
-                  <div className="mt-8 pt-8 border-t border-white/5">
-                    <a href={project.vercelUrl} target="_blank" className="p-5 bg-cyan-600/10 hover:bg-cyan-600/20 border border-cyan-500/30 text-cyan-400 rounded-2xl flex items-center justify-between font-black text-xs uppercase tracking-widest transition-all">
-                      Go Live Application
-                      <ExternalLink size={18} />
+                  <div className="mt-12 pt-10 border-t border-white/5">
+                    <a href={project.vercelUrl} target="_blank" className="p-7 bg-cyan-600/10 hover:bg-cyan-600/20 border border-cyan-500/30 text-cyan-400 rounded-[2rem] flex items-center justify-between font-black text-sm uppercase tracking-[0.3em] transition-all shadow-xl group">
+                      Initialize Live Deployment
+                      <ExternalLink size={24} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                     </a>
                   </div>
                 )}
               </div>
 
-              <div className="glass-card p-10 rounded-[3rem] border-emerald-500/10">
-                <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                  <Zap size={14} /> Technical Solution Matrix
+              <div className="glass-card p-12 rounded-[4rem] border-emerald-500/10 flex flex-col">
+                <h4 className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.5em] mb-8 flex items-center gap-4">
+                  <Zap size={18} /> Neural Solution Architecture
                 </h4>
-                <div className="grid gap-3">
+                <div className="grid gap-4 flex-1">
                   {project.solutions.map((s, i) => (
-                    <div key={i} className="text-xs text-slate-200 flex items-start gap-4 bg-slate-900/40 p-5 rounded-2xl border border-white/5 font-medium leading-relaxed group hover:border-emerald-500/30 transition-all">
-                      <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
-                      {s}
+                    <div key={i} className="text-sm text-slate-100 flex items-start gap-6 bg-slate-900/40 p-7 rounded-[2.5rem] border border-white/5 font-semibold leading-relaxed group hover:border-emerald-500/30 hover:bg-slate-900/60 transition-all shadow-lg">
+                      <div className="bg-emerald-500/10 p-2 rounded-xl border border-emerald-500/20 mt-1">
+                        <CheckCircle2 size={24} className="text-emerald-500 shrink-0" />
+                      </div>
+                      <span className="mt-1">{s}</span>
                     </div>
                   ))}
                 </div>
@@ -342,44 +357,50 @@ const App: React.FC = () => {
             </div>
           )}
 
-          {/* Neural Terminal Console */}
-          <div className="flex-1 flex flex-col glass-card rounded-[4rem] overflow-hidden min-h-[500px] border-white/10 shadow-2xl">
-            <div className="bg-slate-900/90 p-8 border-b border-white/10 flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="flex gap-2">
-                  <div className="h-3.5 w-3.5 rounded-full bg-[#ff5f56]"></div>
-                  <div className="h-3.5 w-3.5 rounded-full bg-[#ffbd2e]"></div>
-                  <div className="h-3.5 w-3.5 rounded-full bg-[#27c93f]"></div>
+          {/* Secure Neural Terminal */}
+          <div className="flex-1 flex flex-col glass-card rounded-[4.5rem] overflow-hidden min-h-[550px] border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.6)]">
+            <div className="bg-slate-900/90 p-10 border-b border-white/10 flex items-center justify-between">
+              <div className="flex items-center gap-8">
+                <div className="flex gap-3">
+                  <div className="h-4 w-4 rounded-full bg-[#ff5f56] shadow-[0_0_15px_#ff5f5680]"></div>
+                  <div className="h-4 w-4 rounded-full bg-[#ffbd2e] shadow-[0_0_15px_#ffbd2e80]"></div>
+                  <div className="h-4 w-4 rounded-full bg-[#27c93f] shadow-[0_0_15px_#27c93f80]"></div>
                 </div>
-                <div className="h-8 w-px bg-white/10 mx-2"></div>
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.5em] font-mono">Neural Nexus Terminal v10.4.0</span>
+                <div className="h-10 w-px bg-white/10 mx-3"></div>
+                <div className="flex flex-col">
+                  <span className="text-[12px] font-black text-slate-500 uppercase tracking-[0.6em] font-mono">Neural Interface Matrix v11.0.4</span>
+                  <span className="text-[9px] text-cyan-500/60 font-mono tracking-widest mt-1">SECURE_TUNNEL: ENCRYPTED_AES256</span>
+                </div>
               </div>
-              <Terminal size={24} className="text-slate-700" />
+              <Terminal size={28} className="text-slate-700 animate-pulse" />
             </div>
             
-            <div className="flex-1 p-10 font-mono text-[13px] overflow-y-auto bg-slate-950/60 custom-scrollbar">
+            <div className="flex-1 p-12 font-mono text-[14px] overflow-y-auto bg-slate-950/60 custom-scrollbar">
               {!project?.logs.length ? (
-                <div className="h-full flex flex-col items-center justify-center text-slate-800 space-y-10">
+                <div className="h-full flex flex-col items-center justify-center text-slate-800 space-y-12">
                    <div className="relative">
-                      <Monitor size={80} strokeWidth={1} className="opacity-20 animate-pulse" />
-                      <div className="absolute inset-0 bg-cyan-500/5 blur-3xl rounded-full"></div>
+                      <Monitor size={120} strokeWidth={1} className="opacity-10 animate-pulse" />
+                      <div className="absolute inset-0 bg-cyan-500/5 blur-[80px] rounded-full"></div>
                    </div>
-                  <p className="uppercase tracking-[0.5em] font-black text-[11px] opacity-30">Awaiting Primary Initiation Sequence...</p>
+                  <p className="uppercase tracking-[0.8em] font-black text-[13px] opacity-20">Awaiting Neural Link Initiation...</p>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {project.logs.map(log => (
-                    <div key={log.id} className="flex gap-8 animate-in fade-in slide-in-from-left-4 duration-500 pb-6 border-b border-white/5 last:border-0">
-                      <span className="text-slate-600 shrink-0 font-bold w-24 select-none opacity-40">{log.timestamp}</span>
-                      <div className="space-y-2">
-                        <span className="text-cyan-400 font-black uppercase text-[10px] tracking-widest bg-cyan-400/5 px-3 py-1 rounded-lg border border-cyan-400/10">
-                          {log.agentName}
-                        </span>
-                        <p className={`leading-relaxed mt-2 ${
+                    <div key={log.id} className="flex gap-10 animate-in fade-in slide-in-from-left-6 duration-700 pb-10 border-b border-white/5 last:border-0 relative">
+                      <span className="text-slate-600 shrink-0 font-bold w-28 select-none opacity-40 text-xs">{log.timestamp}</span>
+                      <div className="space-y-4 flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className={`text-cyan-400 font-black uppercase text-[11px] tracking-[0.4em] bg-cyan-400/5 px-5 py-2 rounded-2xl border border-cyan-400/10 shadow-lg`}>
+                            {log.agentName}
+                          </span>
+                          <Activity size={12} className="text-slate-800" />
+                        </div>
+                        <p className={`leading-relaxed mt-4 pl-6 border-l-2 border-white/5 ${
                           log.type === 'success' ? 'text-emerald-400 font-bold' : 
                           log.type === 'error' ? 'text-rose-400 font-bold' : 
                           log.type === 'warning' ? 'text-amber-400' : 
-                          'text-slate-200 font-medium'
+                          'text-slate-200 font-semibold'
                         }`}>
                           {log.message}
                         </p>
@@ -392,46 +413,50 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Secure Artifact Grid */}
+          {/* Secure Artifact Storage Grid */}
           {project && project.codeFiles.length > 0 && (
-            <div className="glass-card p-14 rounded-[4.5rem] bg-gradient-to-tr from-slate-950 via-slate-950 to-cyan-950/10 border-white/10 relative overflow-hidden">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-10 mb-12 relative z-10">
-                <div className="flex items-center gap-8">
-                  <div className="p-6 bg-cyan-400/10 rounded-[2.5rem] border border-cyan-400/20 shadow-inner">
-                    <FileJson className="text-cyan-400" size={38} />
+            <div className="glass-card p-16 rounded-[5rem] bg-gradient-to-tr from-slate-950 via-slate-950 to-cyan-950/20 border-white/10 relative overflow-hidden shadow-[0_50px_120px_rgba(0,0,0,0.7)]">
+              <div className="absolute -right-20 -bottom-20 opacity-[0.02]">
+                <Database size={400} />
+              </div>
+
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-12 mb-16 relative z-10">
+                <div className="flex items-center gap-10">
+                  <div className="p-8 bg-cyan-400/10 rounded-[3rem] border border-cyan-400/20 shadow-[inset_0_0_30px_rgba(6,182,212,0.1)]">
+                    <FileJson className="text-cyan-400" size={52} />
                   </div>
                   <div>
-                    <h3 className="font-black text-white text-3xl tracking-tighter">Verified Artifact Matrix</h3>
-                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.5em] mt-3">Compliance Verified &bull; 9 Unified Modules Standardized</p>
+                    <h3 className="font-black text-white text-5xl tracking-tighter">Unified Artifact Matrix</h3>
+                    <p className="text-[12px] text-slate-500 font-black uppercase tracking-[0.6em] mt-4">Integrity Verified &bull; 9 Production Objects Sanitized</p>
                   </div>
                 </div>
                 <button 
                   onClick={handleDownload} 
                   disabled={isDownloading} 
-                  className="px-12 py-6 bg-white text-slate-950 hover:bg-cyan-50 font-black rounded-[2.2rem] text-xs shadow-2xl flex items-center gap-4 transition-all active:scale-95 group uppercase tracking-widest"
+                  className="px-16 py-8 bg-white text-slate-950 hover:bg-cyan-50 font-black rounded-[2.5rem] text-sm shadow-2xl flex items-center gap-5 transition-all active:scale-95 group uppercase tracking-[0.3em]"
                 >
-                  {isDownloading ? <RefreshCcw className="animate-spin" /> : <Download size={22} className="group-hover:translate-y-1 transition-transform" />}
-                  Export Package
+                  {isDownloading ? <RefreshCcw className="animate-spin" /> : <Download size={28} className="group-hover:translate-y-1 transition-transform" />}
+                  Secure Export
                 </button>
               </div>
               
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 relative z-10">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-7 relative z-10">
                 {project.codeFiles.map((file, i) => (
                   <button 
                     key={i} 
                     onClick={() => setSelectedFile(file)} 
-                    className="p-8 bg-slate-950/60 hover:bg-cyan-400/10 border border-white/5 hover:border-cyan-400/30 rounded-[2.8rem] transition-all group text-left relative overflow-hidden backdrop-blur-3xl"
+                    className="p-10 bg-slate-950/70 hover:bg-cyan-400/10 border border-white/5 hover:border-cyan-400/40 rounded-[3.5rem] transition-all group text-left relative overflow-hidden backdrop-blur-3xl shadow-xl hover:-translate-y-1"
                   >
-                    <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                       <ArrowRight size={18} className="text-cyan-400 -rotate-45" />
+                    <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                       <ArrowRight size={22} className="text-cyan-400 -rotate-45" />
                     </div>
-                    <div className="p-5 bg-slate-900 rounded-[1.8rem] text-slate-600 group-hover:bg-cyan-400 group-hover:text-slate-950 mb-8 w-fit border border-white/5 transition-all">
+                    <div className="p-6 bg-slate-900 rounded-[2rem] text-slate-600 group-hover:bg-cyan-400 group-hover:text-slate-950 mb-10 w-fit border border-white/5 transition-all shadow-inner">
                       {getFileIcon(file.path)}
                     </div>
                     <div className="flex flex-col">
-                       <span className="text-[12px] font-black text-slate-200 truncate block uppercase tracking-tight group-hover:text-white transition-colors">{file.path}</span>
-                       <span className="text-[9px] text-slate-600 font-bold uppercase mt-3 block tracking-[0.2em] group-hover:text-cyan-400/60">
-                         {file.path.endsWith('.md') ? 'MODULE_DOC' : 'SOURCE_CORE'}
+                       <span className="text-[14px] font-black text-slate-100 truncate block uppercase tracking-tight group-hover:text-white transition-colors">{file.path}</span>
+                       <span className="text-[10px] text-slate-600 font-bold uppercase mt-4 block tracking-[0.3em] group-hover:text-cyan-400/80">
+                         {file.path.endsWith('.md') ? 'MODULE_DOC' : 'CORE_SRC'}
                        </span>
                     </div>
                   </button>
@@ -442,39 +467,39 @@ const App: React.FC = () => {
         </section>
       </div>
 
-      {/* Artifact Viewer Modal */}
+      {/* Code Inspector Modal Viewer */}
       {selectedFile && (
-        <div className="fixed inset-0 bg-slate-950/98 backdrop-blur-3xl z-[200] flex items-center justify-center p-8 md:p-12 animate-in zoom-in duration-500">
-          <div className="glass-card rounded-[4.5rem] w-full max-w-7xl max-h-[92vh] flex flex-col shadow-[0_0_200px_rgba(0,242,255,0.15)] overflow-hidden border-white/10">
-            <div className="p-10 border-b border-white/10 flex items-center justify-between bg-slate-900/60">
-              <div className="flex items-center gap-8">
-                <div className="p-5 bg-cyan-400/10 rounded-2xl border border-cyan-400/20">
+        <div className="fixed inset-0 bg-slate-950/98 backdrop-blur-3xl z-[200] flex items-center justify-center p-6 md:p-14 animate-in zoom-in duration-500">
+          <div className="glass-card rounded-[5rem] w-full max-w-7xl max-h-[92vh] flex flex-col shadow-[0_0_250px_rgba(6,182,212,0.2)] overflow-hidden border-white/10 cyber-border">
+            <div className="p-12 border-b border-white/10 flex items-center justify-between bg-slate-900/60">
+              <div className="flex items-center gap-10">
+                <div className="p-6 bg-cyan-400/10 rounded-3xl border border-cyan-400/20">
                   {getFileIcon(selectedFile.path)}
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-mono text-2xl font-black text-cyan-400 tracking-wider uppercase">{selectedFile.path}</span>
-                  <span className="text-[10px] text-slate-500 font-black uppercase tracking-[0.5em] mt-1">Artifact Inspection Protocol v8.1.0</span>
+                  <span className="font-mono text-3xl font-black text-cyan-400 tracking-wider uppercase">{selectedFile.path}</span>
+                  <span className="text-[11px] text-slate-500 font-black uppercase tracking-[0.6em] mt-2">Nexus Structural Integrity Protocol v9.4.0</span>
                 </div>
               </div>
               <button 
                 onClick={() => setSelectedFile(null)} 
-                className="text-slate-500 hover:text-white p-5 hover:bg-white/5 rounded-full transition-all active:scale-90"
+                className="text-slate-500 hover:text-white p-6 hover:bg-white/10 rounded-full transition-all active:scale-90"
               >
-                <X size={42} />
+                <X size={48} />
               </button>
             </div>
-            <div className="flex-1 overflow-auto p-14 font-mono text-[14px] text-slate-300 leading-relaxed custom-scrollbar bg-slate-950/40">
-              <pre className="whitespace-pre-wrap selection:bg-cyan-500/40">
+            <div className="flex-1 overflow-auto p-16 font-mono text-[15px] text-slate-300 leading-relaxed custom-scrollbar bg-slate-950/40">
+              <pre className="whitespace-pre-wrap selection:bg-cyan-500/50">
                 <code>{selectedFile.content}</code>
               </pre>
             </div>
-            <div className="p-10 border-t border-white/10 flex justify-between items-center bg-slate-900/60">
-               <div className="text-[11px] font-black text-slate-600 uppercase tracking-[0.5em] font-mono">
-                  MATRIX_KERNEL_STABLE_READY
+            <div className="p-12 border-t border-white/10 flex justify-between items-center bg-slate-900/60">
+               <div className="text-[12px] font-black text-slate-600 uppercase tracking-[0.8em] font-mono">
+                  MATRIX_KERNEL_STABLE_4.0
                </div>
                <button 
                 onClick={() => setSelectedFile(null)} 
-                className="px-16 py-5 bg-slate-800 hover:bg-slate-700 text-white rounded-[2rem] text-xs font-black transition-all border border-white/10 active:scale-95 tracking-widest"
+                className="px-20 py-6 bg-slate-800 hover:bg-slate-700 text-white rounded-[2.5rem] text-sm font-black transition-all border border-white/10 active:scale-95 tracking-[0.4em] shadow-2xl"
               >
                 CLOSE INSPECTION
               </button>
@@ -483,20 +508,22 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Background Decor */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-[-5] overflow-hidden opacity-40">
-         <div className="absolute top-[-25%] left-[-20%] w-[80%] h-[80%] bg-cyan-600/10 blur-[250px] animate-pulse"></div>
-         <div className="absolute bottom-[-25%] right-[-20%] w-[80%] h-[80%] bg-indigo-900/10 blur-[250px] animate-pulse delay-1000"></div>
+      {/* Global Ambience Layer */}
+      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-[-5] overflow-hidden opacity-50">
+         <div className="absolute top-[-30%] left-[-25%] w-[90%] h-[90%] bg-cyan-600/10 blur-[300px] animate-pulse"></div>
+         <div className="absolute bottom-[-30%] right-[-25%] w-[90%] h-[90%] bg-indigo-900/10 blur-[300px] animate-pulse delay-1000"></div>
+         <div className="absolute top-[20%] right-[5%] w-[50%] h-[50%] bg-purple-600/5 blur-[250px]"></div>
       </div>
       
-      <footer className="mt-20 mb-16 text-center border-t border-white/5 pt-16">
-        <div className="flex flex-col items-center gap-6 opacity-40">
-           <p className="text-[11px] font-black text-slate-500 uppercase tracking-[0.8em]">
-             &copy; 2025 NEXUSFORGE COMMAND SYSTEM &bull; ARMED BY GEMINI 3 PRO &bull; AUTONOMOUS ARMY v1.4
+      <footer className="mt-28 mb-20 text-center border-t border-white/5 pt-24">
+        <div className="flex flex-col items-center gap-10 opacity-30 group cursor-default">
+           <p className="text-[13px] font-black text-slate-500 uppercase tracking-[1em] group-hover:text-cyan-500 transition-colors">
+             &copy; 2025 NEXUSFORGE COMMAND MATRIX &bull; POWERED BY GEMINI 3.0 PRO &bull; AUTONOMOUS RECURSIVE ENGINE
            </p>
-           <div className="flex gap-10">
-              <div className="h-px w-32 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-              <div className="h-px w-32 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+           <div className="flex gap-14 items-center">
+              <div className="h-px w-40 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+              <Activity size={20} className="text-white/20 animate-spin-slow" />
+              <div className="h-px w-40 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
            </div>
         </div>
       </footer>
@@ -505,15 +532,22 @@ const App: React.FC = () => {
         @keyframes dash {
           to { stroke-dashoffset: -100; }
         }
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+          animation: spin-slow 12s linear infinite;
+        }
         .custom-scrollbar::-webkit-scrollbar {
-          width: 5px;
+          width: 6px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255,255,255,0.05);
+          background: rgba(255,255,255,0.06);
           border-radius: 20px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.12);
         }
       `}</style>
     </div>
