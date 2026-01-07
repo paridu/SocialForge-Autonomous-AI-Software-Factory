@@ -10,8 +10,8 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 export const performResearch = async (market: string) => {
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `รับบทเป็น Viral Niche Algorithmic Scout. วิเคราะห์ตลาด ${market} ในปี 2025.
-    ระบุโอกาสที่ยังไม่มีใครทำ (White Space).
+    contents: `รับบทเป็น Nexus Echo: Viral Niche Algorithmic Scout. วิเคราะห์ตลาด ${market} ในปี 2025.
+    มองหาโอกาสที่ซ่อนอยู่ในชุมชนออนไลน์แบบกระจายศูนย์.
     ตอบกลับในรูปแบบ JSON ภาษาไทยเท่านั้น:
     - name: ชื่อโครงการสุดล้ำ
     - concept: แนวคิดหลักที่ทำให้เป็นไวรัล
@@ -44,14 +44,15 @@ export const performResearch = async (market: string) => {
 export const generateTechnicalPlan = async (projectData: any) => {
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `รับบทเป็น Solution Architect & Context Engineer. ออกแบบโครงสร้างซอฟต์แวร์สำหรับ "${projectData.name}".
-    ข้อมูลเบื้องต้น: ${JSON.stringify(projectData)}
+    contents: `รับบทเป็นทีมวางแผนของ NexusForge (Agent PRD, Context, Sitemap, Database). 
+    ร่วมกันออกแบบโครงสร้างซอฟต์แวร์สำหรับโครงการ "${projectData.name}".
+    ข้อมูลเบื้องต้นจาก Nexus Echo: ${JSON.stringify(projectData)}
     
     สร้างรายละเอียดดังนี้ (เป็นภาษาไทย):
-    1. PRD: รายละเอียดความต้องการทางเทคนิคและธุรกิจ
-    2. Context: การวิเคราะห์บริบทเทคนิค ข้อจำกัด และ Dependencies
-    3. Sitemap: โครงสร้างหน้าเว็บ และ User Journey
-    4. Database Schema: รายละเอียดตารางและความสัมพันธ์ (Text-based ERD)
+    1. PRD (จาก Agent PRD): รายละเอียดความต้องการทางเทคนิคและธุรกิจ
+    2. Context (จาก Agent Context): การวิเคราะห์บริบทเทคนิค ข้อจำกัด และ Dependencies
+    3. Sitemap (จาก Agent Sitemap): โครงสร้างหน้าเว็บ และ User Journey
+    4. Database Schema (จาก Agent Database): รายละเอียดตารางและความสัมพันธ์ (Text-based ERD)
     
     ตอบกลับในรูปแบบ JSON`,
     config: {
@@ -72,28 +73,27 @@ export const generateTechnicalPlan = async (projectData: any) => {
 };
 
 /**
- * 3. ผลิตซอร์สโค้ดและเอกสารทั้งหมด (9 ไฟล์มาตรฐาน)
+ * 3. ผลิตซอร์สโค้ดและเอกสารทั้งหมด (9 ไฟล์มาตรฐาน โดยใช้กองทัพ Agent)
  */
 export const generateCode = async (projectData: any, technicalPlan: any) => {
   const response = await ai.models.generateContent({
     model: "gemini-3-pro-preview",
-    contents: `รับบทเป็นกองทัพ AI Software Factory. ผลิตชุดไฟล์ซอฟต์แวร์มาตรฐานสากลสำหรับ "${projectData.name}".
+    contents: `รับบทเป็นกองทัพ AI Software Factory ของ NexusForge. 
+    แต่ละไฟล์ต้องถูกสร้างโดย Agent เฉพาะทางดังนี้:
+    1. App.tsx (โดย Agent UI-Forge): React + Tailwind ที่ทำงานได้จริง สวยงาม และ Responsive
+    2. index.tsx (โดย Agent Entry-Forge): Entry point ที่สะอาดและเชื่อมต่อกับ App.tsx อย่างถูกต้อง
+    3. README.md (โดย Agent Readme): คู่มือภาษาไทยที่ครบถ้วน
+    4. prd.md (โดย Agent PRD): เอกสาร PRD ภาษาไทย
+    5. context.md (โดย Agent Context): เอกสาร Context ภาษาไทย
+    6. sitemap.md (โดย Agent Sitemap): เอกสาร Sitemap ภาษาไทย
+    7. database.md (โดย Agent Database): เอกสาร Database ภาษาไทย
+    8. agent.md (โดย Agent Scribe): บันทึกกระวัติการตัดสินใจของแต่ละ Agent ในทีม
+    9. presentation.md (โดย Agent Pitch-Deck): เนื้อหาสำหรับ Pitching ภาษาไทย
     
     รายละเอียดโปรเจกต์: ${JSON.stringify(projectData)}
     แผนงานเทคนิค: ${JSON.stringify(technicalPlan)}
     
-    คุณต้องส่งไฟล์กลับมาให้ครบถ้วน 9 ไฟล์ ดังนี้ (เอกสาร .md ต้องเป็นภาษาไทย):
-    1. App.tsx: โค้ด React + Tailwind ที่ทำงานได้จริงและสวยงาม
-    2. index.tsx: Entry point
-    3. README.md: คู่มือการใช้งาน รวม Pain Points และ Solutions อย่างละเอียด
-    4. prd.md: เอกสาร Product Requirements จาก Agent PRD
-    5. context.md: เอกสาร Context Engineering จาก Agent Context
-    6. sitemap.md: รายละเอียด Sitemap และ Flow จาก Agent Sitemap
-    7. database.md: รายละเอียด Database Schema จาก Agent Database
-    8. agent.md: บันทึกประวัติการตัดสินใจและตรรกะของกองทัพ Agent ในการผลิตครั้งนี้
-    9. presentation.md: เนื้อหา Pitch Deck สำหรับผู้นำเสนอ
-    
-    โครงสร้างไฟล์ต้องเป็นมืออาชีพ โค้ดต้องสะอาดและเป็นไปตามหลัก Software Architecture`,
+    ตอบกลับในรูปแบบ JSON ที่บรรจุรายการไฟล์ทั้งหมด`,
     config: {
       responseMimeType: "application/json",
       thinkingConfig: { thinkingBudget: 4000 },
@@ -126,13 +126,12 @@ export const auditCode = async (files: any[]) => {
   const filePaths = files.map(f => f.path);
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `รับบทเป็น Inspector Agent (Auditor). ตรวจสอบชุดไฟล์งานนี้: ${JSON.stringify(filePaths)}.
+    contents: `รับบทเป็น Nexus Auditor. ตรวจสอบชุดไฟล์งานที่กองทัพ Agent ผลิตขึ้นมา: ${JSON.stringify(filePaths)}.
     
     เกณฑ์การตรวจสอบ:
-    - ต้องมี prd.md, context.md, sitemap.md, database.md, agent.md ครบ 5 ไฟล์หลักฝ่ายแผน
-    - ต้องมี App.tsx และ index.tsx สำหรับการรันระบบ
-    - README.md และ presentation.md ต้องครบถ้วน
-    - ตรวจสอบว่ามีเนื้อหา Pain Points และ Solutions อยู่ในเอกสารหรือไม่
+    - ไฟล์ทั้งหมดต้องเป็นไปตามที่แต่ละ Agent ได้รับมอบหมาย (UI, Entry, Docs, Plans)
+    - ไฟล์เอกสาร .md ต้องเป็นภาษาไทยและมีเนื้อหาครบถ้วน
+    - โครงสร้างโค้ดต้องไม่มี Error เบื้องต้น
     
     ตอบกลับเป็น JSON ภาษาไทย (status: "Pass" หรือ "Fail", notes: รายละเอียดสาเหตุ)`,
     config: {
